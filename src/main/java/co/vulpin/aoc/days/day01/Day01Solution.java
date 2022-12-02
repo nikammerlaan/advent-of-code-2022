@@ -8,18 +8,18 @@ public class Day01Solution extends AbstractDayParallelSolution<List<Integer>> {
 
     @Override
     protected Object solvePart1(List<Integer> input) {
-        return input.stream()
-            .mapToInt(i -> i)
-            .max()
-            .orElseThrow();
+        return firstNSum(input, 1);
     }
 
     @Override
     protected Object solvePart2(List<Integer> input) {
-        return input.stream()
-            .sorted(Comparator.reverseOrder())
-            .limit(3)
+        return firstNSum(input, 3);
+    }
+
+    private int firstNSum(List<Integer> nums, int n) {
+        return nums.stream()
             .mapToInt(i -> i)
+            .limit(n)
             .sum();
     }
 
@@ -30,6 +30,7 @@ public class Day01Solution extends AbstractDayParallelSolution<List<Integer>> {
                 .mapToInt(Integer::parseInt)
                 .sum()
             )
+            .sorted(Comparator.reverseOrder())
             .toList();
     }
 
