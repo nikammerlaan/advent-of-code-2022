@@ -1,13 +1,13 @@
 package co.vulpin.aoc.days.day03;
 
-import co.vulpin.aoc.days.AbstractDayParallelSolution;
+import co.vulpin.aoc.days.AbstractDaySolution;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.SetUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Day03Solution extends AbstractDayParallelSolution<List<Day03Solution.Rucksack>> {
+public class Day03Solution extends AbstractDaySolution<List<Day03Solution.Rucksack>> {
 
     @Override
     protected Object solvePart1(List<Rucksack> input) {
