@@ -2,34 +2,45 @@ package co.vulpin.aoc.days.day06;
 
 import co.vulpin.aoc.days.AbstractDaySolution;
 
-public class Day06Solution extends AbstractDaySolution<String> {
+import java.util.HashMap;
+
+public class Day06Solution extends AbstractDaySolution<int[]> {
 
     @Override
-    protected Object solvePart1(String input) {
-        return solve(input, 4);
+    protected Object solvePart1(int[] input) {
+        return findFirst(input, 4);
     }
 
     @Override
-    protected Object solvePart2(String input) {
-        return solve(input, 14);
+    protected Object solvePart2(int[] input) {
+        return findFirst(input, 14);
     }
 
-    private int solve(String input, int length) {
-        for(int i = 0; i < input.length(); i++) {
-            var sub = input.substring(i, i + length);
-            var uniqueLetters = sub.chars()
-                .distinct()
-                .count();
-            if(uniqueLetters == length) {
-                return i + length;
+    private int findFirst(int[] input, int n) {
+        for(int i = 0; i < input.length; i++) {
+            if(input[i] == n) {
+                return i + 1;
             }
         }
         throw new IllegalStateException();
     }
 
     @Override
-    protected String parseInput(String rawInput) {
-        return rawInput;
+    protected int[] parseInput(String rawInput) {
+        var lastSeenMap = new HashMap<Character, Integer>();
+        var output = new int[rawInput.length()];
+
+        for(int i = 0; i < rawInput.length(); i++) {
+            var c = rawInput.charAt(i);
+            var lengthSinceLast = i - (lastSeenMap.getOrDefault(c, -1) + 1);
+            lastSeenMap.put(c, i);
+            var previousLength = i > 0 ? output[i - 1] : 0;
+            var length = Math.min(lengthSinceLast, previousLength) + 1;
+
+            output[i] = length;
+        }
+
+        return output;
     }
 
 }
