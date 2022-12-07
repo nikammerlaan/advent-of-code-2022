@@ -8,6 +8,7 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
 
     private static final long DISK_SPACE = 70_000_000;
     private static final long UPDATE_SIZE = 30_000_000;
+    private static final long DELETION_CANDIDATE_THRESHOLD = 100_000;
 
     @Override
     protected Object solvePart1(Directory input) {
@@ -104,7 +105,7 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
         public long part1(boolean includeSelf) {
             var result = 0;
 
-            if(includeSelf && size <= 100_000) {
+            if(includeSelf && size <= DELETION_CANDIDATE_THRESHOLD) {
                 result += size;
             }
 
