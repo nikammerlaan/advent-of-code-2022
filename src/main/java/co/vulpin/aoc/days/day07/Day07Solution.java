@@ -3,7 +3,6 @@ package co.vulpin.aoc.days.day07;
 import co.vulpin.aoc.days.AbstractDaySolution;
 
 import java.util.*;
-import java.util.stream.LongStream;
 
 public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> {
 
@@ -25,7 +24,9 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
     @Override
     protected Directory parseInput(String rawInput) {
         var commands = rawInput.split("\\$");
-        var iterator = Arrays.stream(commands).iterator();
+        var iterator = Arrays.stream(commands)
+            .map(String::trim)
+            .iterator();
         iterator.next(); // Skip leading empty split
         iterator.next(); // Skip first cd / to get into parsing dir state
         return process(iterator);
@@ -36,24 +37,12 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
         var dirMap = new HashMap<String, Directory>();
 
         while(commandIterator.hasNext()) {
-            var command = commandIterator.next().trim();
+            var command = commandIterator.next();
             var split = command.split("\\s");
             switch(split[0]) {
                 case "cd" -> {
                     if(split[1].equals("..")) {
-                        var items = new ArrayList<Item>();
-                        var rawItems = ls.split("\n");
-                        for(int j = 1; j < rawItems.length; j++) {
-                            var rawItem = rawItems[j];
-                            var parts = rawItem.split(" ");
-                            if(parts[0].equals("dir")) {
-                                items.add(dirMap.get(parts[1]));
-                            } else {
-                                var file = new File(parts[1], Long.parseLong(parts[0]));
-                                items.add(file);
-                            }
-                        }
-                        return new Directory(items);
+                        return buildDirectory(ls, dirMap);
                     } else {
                         dirMap.put(split[1], process(commandIterator));
                     }
@@ -62,6 +51,10 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
             }
         }
 
+        return buildDirectory(ls, dirMap);
+    }
+
+    private Directory buildDirectory(String ls, Map<String, Directory> dirMap) {
         var items = new ArrayList<Item>();
         var rawItems = ls.split("\n");
         for(int j = 1; j < rawItems.length; j++) {
@@ -81,11 +74,15 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
         long size();
     }
 
-    record Directory(List<Item> children, long size) implements Item {
+    record Directory(List<Item> children, List<Directory> directoryChildren, long size) implements Item {
 
         public Directory(List<Item> children) {
             this(
                 children,
+                children.stream()
+                    .filter(Directory.class::isInstance)
+                    .map(Directory.class::cast)
+                    .toList(),
                 children.stream()
                     .mapToLong(Item::size)
                     .sum()
@@ -99,23 +96,28 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
                 result += size;
             }
 
-            result += children.stream()
-                .filter(Directory.class::isInstance)
-                .map(item -> (Directory) item)
+            result += directoryChildren.stream()
                 .mapToLong(dir -> dir.part1(true))
                 .sum();
 
             return result;
         }
 
-        public long part2(long target) {
-            return LongStream.concat(
-                LongStream.of(size),
-                children.stream()
-                    .filter(Directory.class::isInstance)
-                    .map(item -> (Directory) item)
-                    .mapToLong(dir -> dir.part2(target))
-            ).filter(l -> l >= target).min().orElse(Long.MAX_VALUE);
+        public long part2(long targetSize) {
+            long bestDirSize = Long.MAX_VALUE;
+
+            if(size > targetSize) {
+                bestDirSize = size;
+            }
+
+            for(var child : directoryChildren) {
+                var bestDirSizeChild = child.part2(targetSize);
+                if(bestDirSizeChild < bestDirSize) {
+                    bestDirSize = bestDirSizeChild;
+                }
+            }
+
+            return bestDirSize;
         }
 
     }
