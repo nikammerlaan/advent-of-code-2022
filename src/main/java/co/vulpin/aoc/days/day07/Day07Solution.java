@@ -3,7 +3,6 @@ package co.vulpin.aoc.days.day07;
 import co.vulpin.aoc.days.AbstractDaySolution;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
 public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> {
@@ -25,72 +24,67 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
 
     @Override
     protected Directory parseInput(String rawInput) {
-        var stack = new LinkedList<String>();
         var commands = rawInput.split("\\$");
-        var directories = new HashMap<List<String>, Directory>();
-        var lsHistory = new HashMap<List<String>, String>();
+        var iterator = Arrays.stream(commands).iterator();
+        iterator.next(); // Skip leading empty split
+        iterator.next(); // Skip first cd / to get into parsing dir state
+        return process(iterator);
+    }
 
-        Consumer<String> buildChildren = (ls) -> {
-            var items = new ArrayList<Item>();
-            var rawItems = ls.split("\n");
-            for(int j = 1; j < rawItems.length; j++) {
-                var rawItem = rawItems[j];
-                var parts = rawItem.split(" ");
-                if(parts[0].equals("dir")) {
-                    var childPath = new ArrayList<>();
-                    childPath.add(parts[1]);
-                    childPath.addAll(stack);
-                    var directory = directories.get(childPath);
-                    if(directory != null){
-                        items.add(directory);
-                    } else {
-                        return;
-                    }
-                } else {
-                    var file = new File(parts[1], Long.parseLong(parts[0]));
-                    items.add(file);
-                }
-            }
-            directories.put(new ArrayList<>(stack), new Directory(stack.peek(), items));
-        };
+    private Directory process(Iterator<String> commandIterator) {
+        String ls = null;
+        var dirMap = new HashMap<String, Directory>();
 
-        for(int i = 1; i < commands.length; i++) {
-            var command = commands[i].trim();
+        while(commandIterator.hasNext()) {
+            var command = commandIterator.next().trim();
             var split = command.split("\\s");
             switch(split[0]) {
                 case "cd" -> {
-                    switch(split[1]) {
-                        case "/" -> stack.clear();
-                        case ".." -> stack.pop();
-                        default -> stack.push(split[1]);
+                    if(split[1].equals("..")) {
+                        var items = new ArrayList<Item>();
+                        var rawItems = ls.split("\n");
+                        for(int j = 1; j < rawItems.length; j++) {
+                            var rawItem = rawItems[j];
+                            var parts = rawItem.split(" ");
+                            if(parts[0].equals("dir")) {
+                                items.add(dirMap.get(parts[1]));
+                            } else {
+                                var file = new File(parts[1], Long.parseLong(parts[0]));
+                                items.add(file);
+                            }
+                        }
+                        return new Directory(items);
+                    } else {
+                        dirMap.put(split[1], process(commandIterator));
                     }
                 }
-                case "ls" -> lsHistory.put(new ArrayList<>(stack), command);
-            }
-
-            var ls = lsHistory.get(stack);
-            if(ls != null) {
-                buildChildren.accept(ls);
+                case "ls" -> ls = command;
             }
         }
 
-        while(!stack.isEmpty()) {
-            stack.pop();
-            buildChildren.accept(lsHistory.get(stack));
+        var items = new ArrayList<Item>();
+        var rawItems = ls.split("\n");
+        for(int j = 1; j < rawItems.length; j++) {
+            var rawItem = rawItems[j];
+            var parts = rawItem.split(" ");
+            if(parts[0].equals("dir")) {
+                items.add(dirMap.get(parts[1]));
+            } else {
+                var file = new File(parts[1], Long.parseLong(parts[0]));
+                items.add(file);
+            }
         }
-
-        return directories.get(List.of());
+        return new Directory(items);
     }
 
     interface Item {
         long size();
     }
 
-    record Directory(String name, List<Item> children, long size) implements Item {
+    record Directory(List<Item> children, long size) implements Item {
 
-        public Directory(String name, List<Item> children) {
+        public Directory(List<Item> children) {
             this(
-                name,
                 children,
                 children.stream()
                     .mapToLong(Item::size)
@@ -127,4 +121,5 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
     }
 
     record File(String name, long size) implements Item {}
+
 }
