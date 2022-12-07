@@ -26,28 +26,41 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
         var commands = rawInput.split("\\$");
         var iterator = Arrays.stream(commands)
             .map(String::trim)
+            .skip(1) // Skip leading empty split
+            .skip(1) // Skip first cd / to get into parsing dir state
+            .map(this::parseCommand)
             .iterator();
-        iterator.next(); // Skip leading empty split
-        iterator.next(); // Skip first cd / to get into parsing dir state
         return process(iterator);
     }
 
-    private Directory process(Iterator<String> commandIterator) {
+    private Command parseCommand(String raw) {
+        var splits = raw.split("\n", 2);
+        var output = splits.length == 2 ? splits[1] : null;
+        splits = splits[0].split("\\s");
+        var command = splits[0];
+        var param = splits.length == 2 ? splits[1] : null;
+        return new Command(
+            command,
+            param,
+            output
+        );
+    }
+
+    private Directory process(Iterator<Command> commandIterator) {
         String ls = null;
         var dirMap = new HashMap<String, Directory>();
 
         while(commandIterator.hasNext()) {
             var command = commandIterator.next();
-            var split = command.split("\\s");
-            switch(split[0]) {
+            switch(command.command()) {
                 case "cd" -> {
-                    if(split[1].equals("..")) {
+                    if(command.param().equals("..")) {
                         return buildDirectory(ls, dirMap);
                     } else {
-                        dirMap.put(split[1], process(commandIterator));
+                        dirMap.put(command.param(), process(commandIterator));
                     }
                 }
-                case "ls" -> ls = command;
+                case "ls" -> ls = command.output();
             }
         }
 
@@ -55,18 +68,17 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
     }
 
     private Directory buildDirectory(String ls, Map<String, Directory> dirMap) {
-        var items = new ArrayList<Item>();
-        var rawItems = ls.split("\n");
-        for(int j = 1; j < rawItems.length; j++) {
-            var rawItem = rawItems[j];
-            var parts = rawItem.split(" ");
-            if(parts[0].equals("dir")) {
-                items.add(dirMap.get(parts[1]));
-            } else {
-                var file = new File(parts[1], Long.parseLong(parts[0]));
-                items.add(file);
-            }
-        }
+        var items = ls.lines()
+            .map(rawItem -> {
+                var parts = rawItem.split(" ");
+                if(parts[0].equals("dir")) {
+                    return dirMap.get(parts[1]);
+                } else {
+                    return new File(parts[1], Long.parseLong(parts[0]));
+                }
+            })
+            .map(Item.class::cast)
+            .toList();
         return new Directory(items);
     }
 
@@ -123,5 +135,7 @@ public class Day07Solution extends AbstractDaySolution<Day07Solution.Directory> 
     }
 
     record File(String name, long size) implements Item {}
+
+    record Command(String command, String param, String output) {}
 
 }
