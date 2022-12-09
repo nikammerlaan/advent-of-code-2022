@@ -5,21 +5,19 @@ import co.vulpin.aoc.misc.Point;
 
 import java.util.*;
 
-import static co.vulpin.aoc.days.day09.Day09Solution.Direction.*;
-
-public class Day09Solution extends AbstractDaySolution<List<Day09Solution.Direction>> {
+public class Day09Solution extends AbstractDaySolution<List<Character>> {
 
     @Override
-    protected Object solvePart1(List<Direction> instructions) {
+    protected Object solvePart1(List<Character> instructions) {
         return solve(instructions, 2);
     }
 
     @Override
-    protected Object solvePart2(List<Direction> instructions) {
+    protected Object solvePart2(List<Character> instructions) {
         return solve(instructions, 10);
     }
 
-    private int solve(List<Direction> instructions, int chainSize) {
+    private int solve(List<Character> instructions, int chainSize) {
         var chain = new Point[chainSize];
         Arrays.fill(chain, new Point(0, 0));
 
@@ -30,10 +28,10 @@ public class Day09Solution extends AbstractDaySolution<List<Day09Solution.Direct
             var headX = head.x();
             var headY = head.y();
             switch(instruction) {
-                case UP    -> headY++;
-                case DOWN  -> headY--;
-                case LEFT  -> headX--;
-                case RIGHT -> headX++;
+                case 'U' -> headY++;
+                case 'D' -> headY--;
+                case 'L' -> headX--;
+                case 'R' -> headX++;
             }
             chain[0] = new Point(headX, headY);
 
@@ -62,23 +60,15 @@ public class Day09Solution extends AbstractDaySolution<List<Day09Solution.Direct
     }
 
     @Override
-    protected List<Direction> parseInput(String rawInput) {
+    protected List<Character> parseInput(String rawInput) {
         return rawInput.lines()
             .flatMap(line -> {
                 var parts = line.split(" ");
-                var direction = switch(parts[0]) {
-                    case "U" -> UP;
-                    case "D" -> DOWN;
-                    case "L" -> LEFT;
-                    case "R" -> RIGHT;
-                    default -> throw new IllegalArgumentException();
-                };
+                var direction = parts[0].charAt(0);
                 var amount = Integer.parseInt(parts[1]);
                 return Collections.nCopies(amount, direction).stream();
             })
             .toList();
     }
-    
-    enum Direction { UP, DOWN, LEFT, RIGHT }
 
 }
