@@ -9,31 +9,15 @@ public class Day12Solution extends AbstractDaySolution<char[][]> {
 
     @Override
     protected Object solvePart1(char[][] input) {
-        var start = findStart(input);
-        var end = findEnd(input);
-
-        return shortestPath(input, start, end);
+        return shortestPath(input, 'S');
     }
 
     @Override
     protected Object solvePart2(char[][] input) {
-        var end = findEnd(input);
-
-        int min = Integer.MAX_VALUE;
-
-        for(int x = 0; x < input.length; x++) {
-            for(int y = 0; y < input[x].length; y++) {
-                var value = input[x][y];
-                if(value == 'a') {
-                    min = Math.min(min, shortestPath(input, new Point(x, y), end));
-                }
-            }
-        }
-
-        return min;
+        return shortestPath(input, 'a');
     }
 
-    private int shortestPath(char[][] input, Point start, Point end) {
+    private int shortestPath(char[][] input, char startChar) {
         int rows = input.length;
         int cols = input[0].length;
 
@@ -43,10 +27,17 @@ public class Day12Solution extends AbstractDaySolution<char[][]> {
             Arrays.fill(row, Integer.MAX_VALUE);
         }
 
-        distance[start.x()][start.y()] = 0;
-
         var queue = new LinkedList<Point>();
-        queue.add(start);
+
+        for(int x = 0; x < rows; x++) {
+            for(int y = 0; y < cols; y++) {
+                if(input[x][y] == startChar) {
+                    distance[x][y] = 0;
+                    queue.add(new Point(x, y));
+                }
+            }
+        }
+
         while(!queue.isEmpty()) {
             var point = queue.pop();
             var x = point.x();
@@ -65,15 +56,8 @@ public class Day12Solution extends AbstractDaySolution<char[][]> {
             }
         }
 
-        return distance[end.x()][end.y()];
-    }
-
-    private Point findStart(char[][] input) {
-        return findPoint(input, 'S');
-    }
-
-    private Point findEnd(char[][] input) {
-        return findPoint(input, 'E');
+        var point = findPoint(input, 'E');
+        return distance[point.x()][point.y()];
     }
 
     private Point findPoint(char[][] input, char target) {
