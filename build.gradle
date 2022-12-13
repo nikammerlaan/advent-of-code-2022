@@ -10,6 +10,7 @@ repositories {
 
 dependencies {
     implementation libs.apache.commons.collections
+    implementation libs.jackson
 
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params
