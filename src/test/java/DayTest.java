@@ -1,6 +1,6 @@
-import co.vulpin.aoc.data.Result;
-import co.vulpin.aoc.days.DaySolution;
-import co.vulpin.aoc.misc.InputUtils;
+import com.github.nikammerlaan.aoc.data.Result;
+import com.github.nikammerlaan.aoc.days.DaySolution;
+import com.github.nikammerlaan.aoc.misc.InputUtils;
 import org.junit.jupiter.api.Test;
 
 public abstract class DayTest {

@@ -1,5 +1,5 @@
-import co.vulpin.aoc.data.Result;
-import co.vulpin.aoc.days.day10.Day10Solution;
+import com.github.nikammerlaan.aoc.data.Result;
+import com.github.nikammerlaan.aoc.days.day10.Day10Solution;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
