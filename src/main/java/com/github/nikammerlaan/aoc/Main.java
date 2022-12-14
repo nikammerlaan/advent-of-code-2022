@@ -13,16 +13,11 @@ public class Main {
     private static final String CLASS_NAME_FORMAT = "com.github.nikammerlaan.aoc.days.day%02d.Day%02dSolution";
 
     public static void main(String[] args) throws Exception {
-        int dayNumber;
-        if(args.length == 1) {
-            dayNumber = Integer.parseInt(args[0]);
-        } else {
-            dayNumber = getCurrentDayNumber();
-        }
+        var dayNumber = getCurrentDayNumber();
         System.out.printf("Day %02d\n------\n\n", dayNumber);
 
         var daySolution = getDaySolution(dayNumber);
-        var input = InputUtils.getRealInput(dayNumber);
+        var input = InputUtils.getInput(dayNumber, args[0]);
         var result = daySolution.calculateAnswers(input);
         printResult(result);
     }
