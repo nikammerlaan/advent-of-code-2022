@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation libs.apache.commons.collections
     implementation libs.jackson
+    implementation libs.jgrapht
 
     testImplementation libs.junit.jupiter.api
     testImplementation libs.junit.jupiter.params

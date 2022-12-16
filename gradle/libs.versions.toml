@@ -8,3 +8,6 @@ libraries.apache-commons-collections = { group = "org.apache.commons", name = "c
 
 versions.jackson = "2.14.1"
 libraries.jackson = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+
+versions.jgrapht = "1.5.1"
+libraries.jgrapht = { group = "org.jgrapht", name = "jgrapht-core", version.ref = "jgrapht" }
