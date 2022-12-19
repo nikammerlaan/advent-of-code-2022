@@ -126,7 +126,7 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
         }
 
         public State buildOreRobot() {
-            var cost = blueprint.clayRobotCost;
+            var cost = blueprint.oreRobotCost;
             return new State(
                 blueprint,
                 oreRobotCount + 1,
