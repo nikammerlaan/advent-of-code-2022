@@ -10,14 +10,14 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
 
     @Override
     protected Object solvePart1(List<Blueprint> input) {
-        return input.stream()
+        return input.parallelStream()
             .mapToInt(blueprint -> blueprint.id() * getMaxGeodeCount(blueprint, 24))
             .sum();
     }
 
     @Override
     protected Object solvePart2(List<Blueprint> input) {
-        return input.stream()
+        return input.parallelStream()
             .limit(3)
             .mapToInt(blueprint -> getMaxGeodeCount(blueprint, 32))
             .reduce((a, b) -> a * b)
@@ -44,20 +44,20 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
             return cache.get(state);
         }
 
-        if(state.canBuild(blueprint.oreRobotCost)) {
-            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildOreRobot(blueprint.oreRobotCost), max, cache));
-        }
-
-        if(state.canBuild(blueprint.clayRobotCost)) {
-            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildClayRobot(blueprint.clayRobotCost), max, cache));
+        if(state.canBuild(blueprint.geodeRobotCost)) {
+            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildGeodeRobot(blueprint.geodeRobotCost), max, cache));
         }
 
         if(state.canBuild(blueprint.obsidianRobotCost)) {
             max = Math.max(max, getMaxGeodeCount(blueprint, state.buildObsidianRobot(blueprint.obsidianRobotCost), max, cache));
         }
 
-        if(state.canBuild(blueprint.geodeRobotCost)) {
-            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildGeodeRobot(blueprint.geodeRobotCost), max, cache));
+        if(state.canBuild(blueprint.clayRobotCost)) {
+            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildClayRobot(blueprint.clayRobotCost), max, cache));
+        }
+
+        if(state.canBuild(blueprint.oreRobotCost)) {
+            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildOreRobot(blueprint.oreRobotCost), max, cache));
         }
 
         max = Math.max(max, getMaxGeodeCount(blueprint, state.doNothing(), max, cache));
