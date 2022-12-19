@@ -4,7 +4,7 @@ import com.github.nikammerlaan.aoc.days.AbstractDaySolution;
 
 import java.util.*;
 
-import static com.github.nikammerlaan.aoc.misc.MathUtils.getTriangleNumber;
+import static com.github.nikammerlaan.aoc.misc.MathUtils.*;
 
 public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Blueprint>> {
 
@@ -26,11 +26,11 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
 
     private int getMaxGeodeCount(Blueprint blueprint, int minutes) {
         var cache = new HashMap<State, Integer>();
-        var defaultState = new State(1, 0, 0, 0, 0, 0, 0, 0, minutes);
-        return getMaxGeodeCount(blueprint, defaultState, 0, cache);
+        var state = new State(blueprint, 1, 0, 0, 0, 0, 0, 0, 0, minutes);
+        return getMaxGeodeCount(state, 0, cache);
     }
 
-    private int getMaxGeodeCount(Blueprint blueprint, State state, int max, Map<State, Integer> cache) {
+    private int getMaxGeodeCount(State state, int max, Map<State, Integer> cache) {
         if(state.remainingMinutes() == 0) {
             return state.geodeCount();
         }
@@ -44,23 +44,23 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
             return cache.get(state);
         }
 
-        if(state.canBuild(blueprint.geodeRobotCost)) {
-            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildGeodeRobot(blueprint.geodeRobotCost), max, cache));
-        }
+        if(state.shouldBuildGeodeRobot()) {
+            max = Math.max(max, getMaxGeodeCount(state.buildGeodeRobot(), max, cache));
+        } else {
+            if(state.shouldBuildObsidianRobot()) {
+                max = Math.max(max, getMaxGeodeCount(state.buildObsidianRobot(), max, cache));
+            }
 
-        if(state.canBuild(blueprint.obsidianRobotCost)) {
-            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildObsidianRobot(blueprint.obsidianRobotCost), max, cache));
-        }
+            if(state.shouldBuildClayRobot()) {
+                max = Math.max(max, getMaxGeodeCount(state.buildClayRobot(), max, cache));
+            }
 
-        if(state.canBuild(blueprint.clayRobotCost)) {
-            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildClayRobot(blueprint.clayRobotCost), max, cache));
-        }
+            if(state.shouldBuildOreRobot()) {
+                max = Math.max(max, getMaxGeodeCount(state.buildOreRobot(), max, cache));
+            }
 
-        if(state.canBuild(blueprint.oreRobotCost)) {
-            max = Math.max(max, getMaxGeodeCount(blueprint, state.buildOreRobot(blueprint.oreRobotCost), max, cache));
+            max = Math.max(max, getMaxGeodeCount(state.doNothing(), max, cache));
         }
-
-        max = Math.max(max, getMaxGeodeCount(blueprint, state.doNothing(), max, cache));
 
         cache.put(state, max);
 
@@ -93,10 +93,22 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
         );
     }
 
-    record State(int oreRobotCount, int clayRobotCount, int obsidianRobotCount, int geodeRobotCount, int oreCount, int clayCount, int obsidianCount, int geodeCount, int remainingMinutes) {
+    record State(
+        Blueprint blueprint,
+        int oreRobotCount,
+        int clayRobotCount,
+        int obsidianRobotCount,
+        int geodeRobotCount,
+        int oreCount,
+        int clayCount,
+        int obsidianCount,
+        int geodeCount,
+        int remainingMinutes
+    ) {
 
         public State doNothing() {
             return new State(
+                blueprint,
                 oreRobotCount,
                 clayRobotCount,
                 obsidianRobotCount,
@@ -109,8 +121,14 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
             );
         }
 
-        public State buildOreRobot(RobotCost cost) {
+        public boolean shouldBuildOreRobot() {
+            return canBuild(blueprint.oreRobotCost) && oreRobotCount < blueprint.maxCost.oreCost;
+        }
+
+        public State buildOreRobot() {
+            var cost = blueprint.clayRobotCost;
             return new State(
+                blueprint,
                 oreRobotCount + 1,
                 clayRobotCount,
                 obsidianRobotCount,
@@ -123,8 +141,14 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
             );
         }
 
-        public State buildClayRobot(RobotCost cost) {
+        public boolean shouldBuildClayRobot() {
+            return canBuild(blueprint.clayRobotCost) && clayRobotCount < blueprint.maxCost.clayCost;
+        }
+
+        public State buildClayRobot() {
+            var cost = blueprint.clayRobotCost;
             return new State(
+                blueprint,
                 oreRobotCount,
                 clayRobotCount + 1,
                 obsidianRobotCount,
@@ -137,8 +161,14 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
             );
         }
 
-        public State buildObsidianRobot(RobotCost cost) {
+        public boolean shouldBuildObsidianRobot() {
+            return canBuild(blueprint.obsidianRobotCost) && obsidianRobotCount < blueprint.maxCost.obsidianCost;
+        }
+
+        public State buildObsidianRobot() {
+            var cost = blueprint.obsidianRobotCost;
             return new State(
+                blueprint,
                 oreRobotCount,
                 clayRobotCount,
                 obsidianRobotCount + 1,
@@ -151,8 +181,14 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
             );
         }
 
-        public State buildGeodeRobot(RobotCost cost) {
+        public boolean shouldBuildGeodeRobot() {
+            return canBuild(blueprint.geodeRobotCost);
+        }
+
+        public State buildGeodeRobot() {
+            var cost = blueprint.geodeRobotCost;
             return new State(
+                blueprint,
                 oreRobotCount,
                 clayRobotCount,
                 obsidianRobotCount,
@@ -174,7 +210,38 @@ public class Day19Solution extends AbstractDaySolution<List<Day19Solution.Bluepr
 
     }
 
-    record Blueprint(int id, RobotCost oreRobotCost, RobotCost clayRobotCost, RobotCost obsidianRobotCost, RobotCost geodeRobotCost) {}
-    record RobotCost(int oreCost, int clayCost, int obsidianCost) {}
+    record Blueprint(
+        int id,
+        RobotCost oreRobotCost,
+        RobotCost clayRobotCost,
+        RobotCost obsidianRobotCost,
+        RobotCost geodeRobotCost,
+        RobotCost maxCost
+    ) {
 
+        public Blueprint(
+            int id,
+            RobotCost oreRobotCost,
+            RobotCost clayRobotCost,
+            RobotCost obsidianRobotCost,
+            RobotCost geodeRobotCost
+        ) {
+            this(
+                id,
+                oreRobotCost,
+                clayRobotCost,
+                obsidianRobotCost,
+                geodeRobotCost,
+                new RobotCost(
+                    max(oreRobotCost.oreCost,      clayRobotCost.oreCost,      obsidianRobotCost.oreCost,      geodeRobotCost.oreCost),
+                    max(oreRobotCost.clayCost,     clayRobotCost.clayCost,     obsidianRobotCost.clayCost,     geodeRobotCost.clayCost),
+                    max(oreRobotCost.obsidianCost, clayRobotCost.obsidianCost, obsidianRobotCost.obsidianCost, geodeRobotCost.obsidianCost)
+                )
+            );
+        }
+
+    }
+
+    record RobotCost(int oreCost, int clayCost, int obsidianCost) {}
+    
 }
