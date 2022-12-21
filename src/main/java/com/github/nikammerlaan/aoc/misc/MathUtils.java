@@ -15,4 +15,13 @@ public class MathUtils {
         return IntStream.of(values).max().orElseThrow();
     }
 
+    public static boolean isLong(String s) {
+        try {
+            Long.parseLong(s);
+            return true;
+        } catch(NumberFormatException e) {
+            return false;
+        }
+    }
+
 }
