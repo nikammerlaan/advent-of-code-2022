@@ -58,49 +58,6 @@ public class Day22Solution extends AbstractDaySolution<Day22Solution.Input> {
         for(var instruction : input.instructions()) {
             if(MathUtils.isInt(instruction)) {
                 var state = getNextState(faces, face, x, y, d, Integer.parseInt(instruction));
-                var faceChanged = state.face.num != face.num;
-                if(faceChanged) {
-                    System.out.println("Instruction " + i  +" (" + instruction + ")");
-                    System.out.println("Before " + i + ": " + face.num + " (" + i + "/" + input.instructions().size() + ")");
-                    System.out.println("After " + i + ": " + state.face.num + " (" + i + "/" + input.instructions().size() + ")");
-                    for(int x0 = 0; x0 < face.board.length; x0++) {
-                        for(int y0 = 0; y0 < face.board[x0].length; y0++) {
-                            if(x == x0 && y == y0) {
-                                System.out.print(
-                                    switch(d) {
-                                        case 0 -> ">";
-                                        case 1 -> "v";
-                                        case 2 -> "<";
-                                        case 3 -> "^";
-                                        default-> throw new IllegalStateException();
-                                    }
-                                );
-                            } else {
-                                System.out.print(face.board[x0][y0]);
-                            }
-
-                        }
-                        System.out.print(" ");
-
-                        for(int y0 = 0; y0 < face.board[x0].length; y0++) {
-                            if(state.x == x0 && state.y == y0) {
-                                System.out.print(
-                                    switch(state.d) {
-                                        case 0 -> ">";
-                                        case 1 -> "v";
-                                        case 2 -> "<";
-                                        case 3 -> "^";
-                                        default-> throw new IllegalStateException();
-                                    }
-                                );
-                            } else {
-                                System.out.print(state.face.board[x0][y0]);
-                            }
-                        }
-                        System.out.print("\n");
-                    }
-                    System.out.println("\n\n\n");
-                }
                 face = state.face();
                 x = state.x();
                 y = state.y();
@@ -159,23 +116,30 @@ public class Day22Solution extends AbstractDaySolution<Day22Solution.Input> {
 
         var sides = new ArrayList<Face>();
 
-//        int[][] connections = {
-//            { 5, 3, 2, 1 }, // 0
-//            { 2, 4, 5, 0 }, // 1
-//            { 3, 4, 1, 0 }, // 2
-//            { 5, 4, 2, 0 }, // 3
-//            { 5, 1, 2, 3 }, // 4
-//            { 0, 1, 4, 3 }  // 5
-//        };
+        int[][] connections;
 
-        int[][] connections = {
-            { 1, 2, 3, 5 }, // 0
-            { 4, 2, 0, 5 }, // 1
-            { 1, 4, 3, 0 }, // 2
-            { 4, 5, 0, 2 }, // 3
-            { 1, 5, 3, 2 }, // 4
-            { 4, 1, 0, 3 }  // 5
-        };
+        // Manually specify connections between faces
+        if(sideLength == 50) {
+            connections = new int[][] {
+                {1, 2, 3, 5}, // 0
+                {4, 2, 0, 5}, // 1
+                {1, 4, 3, 0}, // 2
+                {4, 5, 0, 2}, // 3
+                {1, 5, 3, 2}, // 4
+                {4, 1, 0, 3}  // 5
+            };
+        } else if(sideLength == 4) {
+            connections = new int[][] {
+                { 5, 3, 2, 1 }, // 0
+                { 2, 4, 5, 0 }, // 1
+                { 3, 4, 1, 0 }, // 2
+                { 5, 4, 2, 0 }, // 3
+                { 5, 1, 2, 3 }, // 4
+                { 0, 1, 4, 3 }  // 5
+            };
+        } else {
+            throw new IllegalStateException("No hardcoded connections for this input");
+        }
 
         for(int x = 0; x < board.length; x++) {
             for(int y = 0; y < board[x].length; y++) {
@@ -215,19 +179,11 @@ public class Day22Solution extends AbstractDaySolution<Day22Solution.Input> {
             }
 
             if(isOutOfBounds(newFace.board, newX, newY)) {
-
-                if(face.num != newFace.num) {
-                    System.out.println("Connecting " + face.num + " to " + newFace.num);
-                }
-
-
                 newFace = faces.get(face.connections[d]);
                 var outgoingDirection = d;
                 int incomingDirection = (newFace.getConnectingDirection(face.num) + 2) % 4;
 
                 newD = incomingDirection;
-
-
 
                 switch(outgoingDirection) {
                     case 0 -> {
@@ -251,7 +207,9 @@ public class Day22Solution extends AbstractDaySolution<Day22Solution.Input> {
                     }
                     case 1 -> {
                         switch(incomingDirection) {
-                            case 0 -> throw new IllegalStateException();
+                            case 0 -> {
+
+                            }
                             case 1 -> {
                                 newX = 0;
                             }
@@ -306,10 +264,6 @@ public class Day22Solution extends AbstractDaySolution<Day22Solution.Input> {
             if(face.num == 0 && newFace.num == 3) {
                 newX = len - x - 1;
                 newY = 0;
-            }
-
-            if(face.num != newFace.num) {
-                System.out.println("Connecting " + face.num + " to " + newFace.num);
             }
 
             if(newFace.board[newX][newY] == '#') {
