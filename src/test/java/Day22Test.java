@@ -11,8 +11,8 @@ public class Day22Test extends DayTest {
 
     @Override
     protected void assertExampleResult(Result result) {
+        assertEquals(6032, result.part1Result().result());
         // Solution does not work for the example yet
-//        assertEquals(6032, result.part1Result().result());
 //        assertEquals(5031, result.part2Result().result());
     }
 

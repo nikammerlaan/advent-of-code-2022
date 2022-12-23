@@ -214,7 +214,9 @@ public class Day22Solution extends AbstractDaySolution<Day22Solution.Input> {
                     case 1 -> {
                         switch(incomingDirection) {
                             case 0 -> {
-
+                                // Broken
+                                newX = 0;
+                                newY = 0;
                             }
                             case 1 -> {
                                 newX = 0;
