@@ -10,6 +10,12 @@ import java.util.stream.IntStream;
 
 public class Day22Solution extends AbstractDaySolution<Day22Solution.Input> {
 
+    //
+    // WARNING
+    //
+    // THIS CODE BARELY WORKS
+    //
+
     @Override
     protected Object solvePart1(Input input) {
         var x = 1;
