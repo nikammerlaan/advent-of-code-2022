@@ -13,7 +13,7 @@ public class Main {
     private static final String CLASS_NAME_FORMAT = "com.github.nikammerlaan.aoc.days.day%02d.Day%02dSolution";
 
     public static void main(String[] args) throws Exception {
-        var dayNumber = 22;
+        var dayNumber = getCurrentDayNumber();
         System.out.printf("Day %02d\n------\n\n", dayNumber);
 
         var daySolution = getDaySolution(dayNumber);
