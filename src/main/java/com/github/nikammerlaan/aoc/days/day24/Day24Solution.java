@@ -1,114 +1,71 @@
 package com.github.nikammerlaan.aoc.days.day24;
 
 import com.github.nikammerlaan.aoc.days.AbstractDaySolution;
-import com.github.nikammerlaan.aoc.misc.*;
+import com.github.nikammerlaan.aoc.misc.Point;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 public class Day24Solution extends AbstractDaySolution<Day24Solution.Input> {
 
-    private static final int SAFE_DEPTH = 2_000;
-
-    record CacheKey(Point point, Point target, int minute) {}
-    private final Map<CacheKey, Integer> cache;
-
-    public Day24Solution() {
-        this.cache = new ConcurrentHashMap<>();
-    }
+    public Day24Solution() {}
 
     @Override
     protected Object solvePart1(Input input) {
-        var start = input.start;
-        var goal = input.target;
-
-        return solve(input, start, goal, 0, SAFE_DEPTH);
+        return solve(input, input.start, input.target, 0);
     }
 
     @Override
     protected Object solvePart2(Input input) {
-        var start = input.start;
-        var goal = input.target;
-
         int minute = 0;
-        minute = solve(input, start, goal, minute, minute + SAFE_DEPTH);
-        minute = solve(input, goal, start, minute, minute + SAFE_DEPTH);
-        minute = solve(input, start, goal, minute, minute + SAFE_DEPTH);
+
+        minute = solve(input, input.start, input.target, minute);
+        minute = solve(input, input.target, input.start, minute);
+        minute = solve(input, input.start, input.target, minute);
 
         return minute;
     }
 
-    private int solve(Input input, Point point, Point goal, int minute, int min) {
-        var x = point.x();
-        var y = point.y();
+    private int solve(Input input, Point start, Point target, int startMinute) {
+        record State(Point point, int minute) {}
 
-        var goalX = goal.x();
-        var goalY = goal.y();
+        var min = Integer.MAX_VALUE;
 
-        if(!isFree(input, point, minute)) {
-            return min;
+        var queue = new LinkedList<State>();
+        queue.add(new State(start, startMinute));
+
+        var seen = new HashSet<State>();
+
+        while(!queue.isEmpty()) {
+            var state = queue.poll();
+            if(!seen.add(state)) {
+                continue;
+            }
+
+            var point = state.point();
+            var minute = state.minute();
+
+            var x = point.x();
+            var y = point.y();
+
+            if(!isFree(input, point, minute)) {
+                continue;
+            }
+
+            var remainingTime = min - minute;
+            if(point.getDistance(target) >= remainingTime) {
+                continue;
+            }
+
+            if(point.equals(target)) {
+                min = Math.min(min, minute);
+            }
+
+            queue.add(new State(new Point(x - 1, y), minute + 1)); // up
+            queue.add(new State(new Point(x + 1, y), minute + 1)); // down
+            queue.add(new State(new Point(x, y - 1), minute + 1)); // left
+            queue.add(new State(new Point(x, y + 1), minute + 1)); // right
+            queue.add(new State(new Point(x, y),     minute + 1)); // wait
         }
-
-        var cacheKey = new CacheKey(point, goal, minute);
-        if(cache.containsKey(cacheKey)) {
-            return Math.min(min, cache.get(cacheKey));
-        }
-
-        if(minute >= min) {
-            return min;
-        }
-
-        if(point.equals(goal)) {
-            return minute;
-        }
-
-        var remainingTime = min - minute;
-        var distance = MathUtils.getManhattanDistance(x, y, goalX, goalY);
-        if(distance >= remainingTime) {
-            return min;
-        }
-
-        var up = new Point(x - 1, y);
-        var down = new Point(x + 1, y);
-        var left = new Point(x, y - 1);
-        var right = new Point(x, y + 1);
-
-        if(x > goalX) {
-            // Up
-            min = solve(input,up, goal, minute + 1, min);
-        } else {
-            // Down
-            min = solve(input ,down, goal, minute + 1, min);
-        }
-
-        if(y > goalY) {
-            // Left
-            min = solve(input, left, goal, minute + 1, min);
-        } else {
-            // Right
-            min = solve(input, right, goal, minute + 1, min);
-        }
-
-        if(x > goalX) {
-            // Down
-            min = solve(input, down, goal, minute + 1, min);
-        } else {
-            // Up
-            min = solve(input, up, goal, minute + 1, min);
-        }
-
-        if(y > goalY) {
-            // Right
-            min = solve(input, right, goal, minute + 1, min);
-        } else {
-            // Left
-            min = solve(input, left, goal, minute + 1, min);
-        }
-
-        // Wait
-        min = solve(input, point, goal, minute + 1, min);
-
-        cache.put(cacheKey, min);
 
         return min;
     }
