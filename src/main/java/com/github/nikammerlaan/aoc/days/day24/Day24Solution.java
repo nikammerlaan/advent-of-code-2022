@@ -28,8 +28,6 @@ public class Day24Solution extends AbstractDaySolution<Day24Solution.Input> {
     private int solve(Input input, Point start, Point target, int startMinute) {
         record State(Point point, int minute) {}
 
-        var min = Integer.MAX_VALUE;
-
         var queue = new LinkedList<State>();
         queue.add(new State(start, startMinute));
 
@@ -51,13 +49,8 @@ public class Day24Solution extends AbstractDaySolution<Day24Solution.Input> {
                 continue;
             }
 
-            var remainingTime = min - minute;
-            if(point.getDistance(target) >= remainingTime) {
-                continue;
-            }
-
             if(point.equals(target)) {
-                min = Math.min(min, minute);
+                return minute;
             }
 
             queue.add(new State(new Point(x - 1, y), minute + 1)); // up
@@ -67,7 +60,7 @@ public class Day24Solution extends AbstractDaySolution<Day24Solution.Input> {
             queue.add(new State(new Point(x, y),     minute + 1)); // wait
         }
 
-        return min;
+        throw new IllegalStateException();
     }
 
     private boolean isFree(Input input, Point point, int minute) {
